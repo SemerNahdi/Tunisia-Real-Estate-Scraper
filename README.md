@@ -13,6 +13,7 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 
 - Exposes the scraped data via endpoints.
 - Allows triggering new scraping sessions.
+- Supports pagination for retrieving listings in smaller chunks.
 
 ### **3. Data Storage**
 
@@ -23,6 +24,9 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 
 - Generates interactive API documentation using Swagger UI and ReDoc.
 
+###**5. Caching**
+Uses aiocache to cache API responses for improved performance.
+
 ## **Technologies Used**
 
 - **Python**: Programming language.
@@ -31,6 +35,7 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 - **MongoDB**: NoSQL database for storing scraped data.
 - **Pymongo**: Python driver for MongoDB.
 - **Requests**: HTTP library for making requests.
+- **aiocache**: Caching library for FastAPI.
 - **Pandas**: Data manipulation library for exporting data to CSV.
 
 ## **Installation**
@@ -91,7 +96,10 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 - **URL**: `http://127.0.0.1:8000/annonces`
 - **Method**: `GET`
 - **Description**: Retrieve all real estate listings from the database.
-  **Response**:
+-**Parameters**:
+      skip (optional): Number of items to skip (default: 0).
+      limit (optional): Number of items to return (default: 10).
+-**Response**:
 
 ```json
 {
@@ -114,7 +122,10 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
       "producttype": "sale",
       "image_urls": ["https://example.com/image1.jpg"]
     }
-  ]
+  ],
+  "total": 1000,
+  "skip": 0,
+  "limit": 10
 }
 ```
 
@@ -177,7 +188,7 @@ The API includes **automatic interactive documentation** powered by Swagger UI a
 2. **Retrieve All Listings**:
 
    ```bash
-   curl http://127.0.0.1:8000/annonces
+   curl "http://127.0.0.1:8000/annonces?skip=20&limit=10"
    ```
 
 3. **Trigger a New Scraping Session**:
@@ -193,6 +204,14 @@ The API includes **automatic interactive documentation** powered by Swagger UI a
 - **Files**:
   - Raw data: `tayara_immo_neuf_raw.json`
   - Structured data: `tayara_immo_neuf_structured.csv`
+## **Caching**
+
+-The /annonces endpoint caches responses for 60 seconds using aiocache.
+-Caching reduces database load and improves API performance.
+
+## **Error Handling**
+-The API includes robust error handling and logging.
+-Errors are logged for debugging, and meaningful error messages are returned to the client.
 
 ## **License**
 
