@@ -1,6 +1,9 @@
- 
 fastapi
 uvicorn
+motor
+httpx
+fastapi-cache
 pymongo
 pandas
 requests
+aiocache

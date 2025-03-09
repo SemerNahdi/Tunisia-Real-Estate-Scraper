@@ -1,11 +1,20 @@
- 
 import http.client
 import json
-import pandas as pd
-from pymongo import MongoClient
 import time
+import logging
+import httpx
+from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
+from app.db import get_db
 
-def fetch_tayara_data():
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def fetch_tayara_data_sync():
+    """
+    Synchronous version of the scraping function.
+    """
     conn = http.client.HTTPSConnection("www.tayara.tn")
     headers = {
         'cookie': "caravel-cookie=%220ca08badccbd001c%22",
@@ -26,8 +35,8 @@ def fetch_tayara_data():
             data = res.read().decode('utf-8')
 
             if status_code != 200:
-                print(f"Error: HTTP status code {status_code} on page {page}")
-                print(f"Response content: {data}")
+                logger.error(f"Error: HTTP status code {status_code} on page {page}")
+                logger.error(f"Response content: {data}")
                 break  # Stop the loop on HTTP error
 
             try:
@@ -35,7 +44,7 @@ def fetch_tayara_data():
                 listings = json_data['pageProps']['searchedListingsAction']['newHits']
 
                 if not listings:
-                    print(f"No listings found on page {page}. Assuming end of pages.")
+                    logger.info(f"No listings found on page {page}. Assuming end of pages.")
                     break  # Stop the loop if no listings are found
 
                 golden_listing = json_data['pageProps'].get('goldenListing')
@@ -48,17 +57,17 @@ def fetch_tayara_data():
                     all_listings.extend(premium_listing)
 
                 total_listings_count += len(listings)
-                print(f"Page {page} processed. Listings: {len(listings)}, Total: {total_listings_count}")
+                logger.info(f"Page {page} processed. Listings: {len(listings)}, Total: {total_listings_count}")
                 page += 1
                 time.sleep(1)  # Pause for 1 second between requests
 
             except json.JSONDecodeError:
-                print(f"Error: Invalid JSON on page {page}")
-                print(f"Response content: {data}")
+                logger.error(f"Error: Invalid JSON on page {page}")
+                logger.error(f"Response content: {data}")
                 break  # Stop the loop if JSON is invalid
 
     except Exception as e:
-        print(f"Error occurred: {e}")
+        logger.error(f"Error occurred: {e}")
 
     finally:
         conn.close()
@@ -74,5 +83,48 @@ def fetch_tayara_data():
     collection.delete_many({})  # Clear existing data
     collection.insert_many(all_listings)  # Insert new data
 
-    print(f"\nAll pages processed. Total listings found: {total_listings_count}")
-    print(f"Total listings imported into MongoDB: {len(all_listings)}")
+    logger.info(f"\nAll pages processed. Total listings found: {total_listings_count}")
+    logger.info(f"Total listings imported into MongoDB: {len(all_listings)}")
+
+async def fetch_tayara_data_async():
+    """
+    Asynchronous version of the scraping function.
+    """
+    db = get_db()
+    collection = db['immo_neuf']
+
+    async with httpx.AsyncClient() as client:
+        page = 1
+        all_listings = []
+        while True:
+            url = f"https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page={page}&category=Immobilier"
+            response = await client.get(url)
+            if response.status_code != 200:
+                logger.error(f"Error: HTTP status code {response.status_code} on page {page}")
+                break
+
+            try:
+                data = response.json()
+                listings = data['pageProps']['searchedListingsAction']['newHits']
+                if not listings:
+                    logger.info(f"No listings found on page {page}. Assuming end of pages.")
+                    break
+
+                all_listings.extend(listings)
+                logger.info(f"Page {page} processed. Listings: {len(listings)}")
+                page += 1
+
+            except Exception as e:
+                logger.error(f"Error processing page {page}: {e}")
+                break
+
+        # Save data to MongoDB
+        if all_listings:
+            await collection.delete_many({})
+            await collection.insert_many(all_listings)
+            logger.info(f"Total listings imported into MongoDB: {len(all_listings)}")
+        else:
+            logger.warning("No listings found to import.")
+
+# Choose which version to use (sync or async)
+fetch_tayara_data = fetch_tayara_data_async  # Default to async

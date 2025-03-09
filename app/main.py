@@ -1,11 +1,17 @@
-from fastapi import FastAPI, HTTPException
-from app.scraper import fetch_tayara_data
-from pymongo import MongoClient
+from fastapi import FastAPI, HTTPException, Query, status
+from motor.motor_asyncio import AsyncIOMotorClient
+from aiocache import cached
+from aiocache.serializers import JsonSerializer
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
+# Initialize MongoDB connection with connection pooling
+client = AsyncIOMotorClient("mongodb://localhost:27017/", maxPoolSize=100)
 db = client['tayara']
 collection = db['immo_neuf']
 
@@ -17,26 +23,46 @@ def read_root():
     return {"message": "Welcome to the Tunisian Real Estate Scraping API!"}
 
 @app.get("/annonces")
-def get_annonces():
+@cached(ttl=60, serializer=JsonSerializer())  # Cache for 60 seconds
+async def get_annonces(
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Number of items to return")
+):
     """
-    Endpoint to retrieve all collected announcements.
+    Retrieve paginated real estate listings.
     """
     try:
-        annonces = list(collection.find({}, {'_id': 0}))
-        return {"annonces": annonces}
+        annonces = await collection.find({}, {'_id': 0}).skip(skip).limit(limit).to_list(length=limit)
+        total = await collection.count_documents({})
+        return {
+            "annonces": annonces,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error fetching listings: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching listings."
+        )
 
 @app.post("/scrape")
-def scrape():
+async def scrape():
     """
-    Endpoint to trigger a new scraping session.
+    Trigger a new scraping session.
     """
     try:
-        fetch_tayara_data()  # Call your scraping function
+        # Call your scraping function (fetch_tayara_data)
+        from app.scraper import fetch_tayara_data
+        await fetch_tayara_data()
         return {"status": "Scraping completed successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error during scraping: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred during scraping."
+        )
 
 if __name__ == "__main__":
     import uvicorn
