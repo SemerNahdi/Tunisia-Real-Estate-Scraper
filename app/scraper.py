@@ -1,3 +1,4 @@
+ 
 import http.client
 import json
 import pandas as pd
@@ -75,34 +76,3 @@ def fetch_tayara_data():
 
     print(f"\nAll pages processed. Total listings found: {total_listings_count}")
     print(f"Total listings imported into MongoDB: {len(all_listings)}")
-
-    # Prepare data for CSV (unchanged)
-    csv_data = []
-    for listing in all_listings:
-        csv_data.append({
-            'id': listing['id'],
-            'title': listing['title'],
-            'description': listing['description'],
-            'price': listing.get('price', ''),
-            'phone': listing.get('phone', ''),
-            'delegation': listing['location']['delegation'],
-            'governorate': listing['location']['governorate'],
-            'publishedOn': listing['metadata']['publishedOn'],
-            'isModified': listing['metadata']['isModified'],
-            'state': listing['metadata']['state'],
-            'subCategory': listing['metadata']['subCategory'],
-            'isFeatured': listing['metadata']['isFeatured'],
-            'publisher_name': listing['metadata']['publisher']['name'],
-            'publisher_isShop': listing['metadata']['publisher']['isShop'],
-            'producttype': listing['metadata']['producttype'],
-            'image_urls': listing['images']
-        })
-    df = pd.DataFrame(csv_data)
-    df.to_csv('tayara_immo_neuf_structured.csv', index=False, encoding='utf-8-sig')
-
-    print("Data has been saved to tayara_immo_neuf_structured.csv")
-    print("Data has been saved to tayara_immo_neuf_raw.json")
-    print("Data has been inserted into MongoDB")
-
-# Run the scraping function
-fetch_tayara_data()

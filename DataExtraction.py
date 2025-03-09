@@ -1,51 +1,84 @@
 import http.client
-import http.client
 import json
 import pandas as pd
 from pymongo import MongoClient
+import time
 
-conn = http.client.HTTPSConnection("www.tayara.tn")
-
-payload = ""
-
-headers = {
-    'cookie': "caravel-cookie=%220ca08badccbd001c%22",
-    'User-Agent': "insomnia/10.3.1"
+def fetch_tayara_data():
+    conn = http.client.HTTPSConnection("www.tayara.tn")
+    headers = {
+        'cookie': "caravel-cookie=%220ca08badccbd001c%22",
+        'User-Agent': "insomnia/10.3.1"
     }
+    page = 1
+    all_listings = []
+    total_listings_count = 0
+    max_pages = 500  # Set a reasonable maximum page limit
 
-conn.request("GET", "/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page=100&category=Immobilier", payload, headers)
+    try:
+        while page <= max_pages:
+            payload = ""
+            url = f"/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page={page}&category=Immobilier"
+            conn.request("GET", url, payload, headers)
+            res = conn.getresponse()
+            status_code = res.status
+            data = res.read().decode('utf-8')
 
-try:
-    res = conn.getresponse()
-    data = res.read().decode('utf-8')
-    json_data = json.loads(data)
-    listings = json_data['pageProps']['searchedListingsAction']['newHits']
-    golden_listing = json_data['pageProps'].get('goldenListing')
+            if status_code != 200:
+                print(f"Error: HTTP status code {status_code} on page {page}")
+                print(f"Response content: {data}")
+                break  # Stop the loop on HTTP error
 
-    # Sauvegarde des données brutes dans un fichier JSON
-    all_listings = listings.copy()
-    if golden_listing:
-        all_listings.append(golden_listing)
+            try:
+                json_data = json.loads(data)
+                listings = json_data['pageProps']['searchedListingsAction']['newHits']
 
+                if not listings:
+                    print(f"No listings found on page {page}. Assuming end of pages.")
+                    break  # Stop the loop if no listings are found
+
+                golden_listing = json_data['pageProps'].get('goldenListing')
+                premium_listing = json_data['pageProps']['searchedListingsAction'].get('premiumHits')
+
+                all_listings.extend(listings)
+                if golden_listing:
+                    all_listings.append(golden_listing)
+                if premium_listing:
+                    all_listings.extend(premium_listing)
+
+                total_listings_count += len(listings)
+                print(f"Page {page} processed. Listings: {len(listings)}, Total: {total_listings_count}")
+                page += 1
+                time.sleep(1)  # Pause for 1 second between requests
+
+            except json.JSONDecodeError:
+                print(f"Error: Invalid JSON on page {page}")
+                print(f"Response content: {data}")
+                break  # Stop the loop if JSON is invalid
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+    finally:
+        conn.close()
+
+    # Save raw data to JSON file
     with open('tayara_immo_neuf_raw.json', 'w', encoding='utf-8') as f:
         json.dump(all_listings, f, ensure_ascii=False, indent=4)
 
-    # Chargement du fichier JSON dans MongoDB
+    # Save data to MongoDB
     client = MongoClient("mongodb://localhost:27017/")
     db = client['tayara']
     collection = db['immo_neuf']
+    collection.delete_many({})  # Clear existing data
+    collection.insert_many(all_listings)  # Insert new data
 
-    # Effacer la collection avant de réinsérer les données (optionnel)
-    collection.delete_many({})
+    print(f"\nAll pages processed. Total listings found: {total_listings_count}")
+    print(f"Total listings imported into MongoDB: {len(all_listings)}")
 
-    # Insertion des données du fichier JSON dans MongoDB
-    with open('tayara_immo_neuf_raw.json', 'r', encoding='utf-8') as f:
-        loaded_listings = json.load(f)
-        collection.insert_many(loaded_listings)
-
-    # Préparation des données pour le CSV
-    csv_data =[]
-    for listing in listings:
+    # Prepare data for CSV (unchanged)
+    csv_data = []
+    for listing in all_listings:
         csv_data.append({
             'id': listing['id'],
             'title': listing['title'],
@@ -62,53 +95,14 @@ try:
             'publisher_name': listing['metadata']['publisher']['name'],
             'publisher_isShop': listing['metadata']['publisher']['isShop'],
             'producttype': listing['metadata']['producttype'],
-            'image_urls': listing['images'],
-            'listing_type': 'normal'
+            'image_urls': listing['images']
         })
-
-    if golden_listing:
-        csv_data.append({
-            'id': golden_listing['id'],
-            'title': golden_listing['title'],
-            'description': golden_listing['description'],
-            'price': golden_listing.get('price', ''),
-            'phone': golden_listing.get('phone', ''),
-            'delegation': golden_listing['location']['delegation'],
-            'governorate': golden_listing['location']['governorate'],
-            'publishedOn': golden_listing['metadata']['publishedOn'],
-            'isModified': golden_listing['metadata'].get('isModified'),
-            'state': golden_listing['metadata']['state'],
-            'subCategory': golden_listing['metadata']['subCategory'],
-            'isFeatured': golden_listing['metadata']['isFeatured'],
-            'publisher_name': golden_listing['metadata']['publisher']['name'],
-            'publisher_isShop': golden_listing['metadata']['publisher']['isShop'],
-            'producttype': golden_listing['metadata'].get('producttype'),
-            'image_urls': golden_listing['images'],
-            'listing_type': 'golden'
-        })
-
     df = pd.DataFrame(csv_data)
     df.to_csv('tayara_immo_neuf_structured.csv', index=False, encoding='utf-8-sig')
 
-    # Calcul des statistiques
-    normal_listings_count = df['listing_type'].value_counts().get('normal', 0)
-    golden_listings_count = df['listing_type'].value_counts().get('golden', 0)
-    total_listings = len(df)
-
-    # Affichage des statistiques
     print("Data has been saved to tayara_immo_neuf_structured.csv")
     print("Data has been saved to tayara_immo_neuf_raw.json")
-    print("Data has been inserted into MongoDB from JSON file")
-    print("\n--- Listing Statistics ---")
-    print("Normal Listings:", normal_listings_count)
-    print("Golden Listings:", golden_listings_count)
-    print("Total Listings:", total_listings)
-    print("-------------------------")
+    print("Data has been inserted into MongoDB")
 
-except Exception as e:
-    print("Error occurred:", e)
-
-finally:
-        conn.close()
-
-print(data.decode("utf-8"))
+# Run the scraping function
+fetch_tayara_data()
