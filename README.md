@@ -206,12 +206,12 @@ The API includes **automatic interactive documentation** powered by Swagger UI a
   - Structured data: `tayara_immo_neuf_structured.csv`
 ## **Caching**
 
--The /annonces endpoint caches responses for 60 seconds using aiocache.
--Caching reduces database load and improves API performance.
+   - The /annonces endpoint caches responses for 60 seconds using aiocache.
+   - Caching reduces database load and improves API performance.
 
 ## **Error Handling**
--The API includes robust error handling and logging.
--Errors are logged for debugging, and meaningful error messages are returned to the client.
+   - The API includes robust error handling and logging.
+   - Errors are logged for debugging, and meaningful error messages are returned to the client.
 
 ## **License**
 
