@@ -4,10 +4,25 @@ from aiocache import cached
 from aiocache.serializers import JsonSerializer
 import logging
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+# Set up logging to log to a file
+log_file = 'app.log'  # Specify the log file location
+logger = logging.getLogger()
 
+# Configure the logging to write logs to the file
+file_handler = logging.FileHandler(log_file)
+file_handler.setLevel(logging.DEBUG)  # Change to DEBUG for detailed logging
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+logger.addHandler(file_handler)
+
+# Optionally, set the log level for the root logger
+logger.setLevel(logging.DEBUG)
 app = FastAPI()
 
 # Initialize MongoDB connection with connection pooling
@@ -47,19 +62,34 @@ async def get_annonces(
             detail="An error occurred while fetching listings."
         )
 
+
 @app.get("/annonces/new")
 async def get_new_annonces():
     """
     Retrieve new real estate listings added in the last 24 hours.
     """
     try:
-        # Calculate the timestamp for 24 hours ago
-        twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+        # Calculate the timestamp for 24 hours ago with a timezone (UTC)
+        twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+        logger.debug(f"Timestamp for 24 hours ago: {twenty_four_hours_ago}")
+
+        # Convert the timestamp to string in ISO format (the same format as 'metadata.publishedOn')
+        twenty_four_hours_ago_str = twenty_four_hours_ago.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+        logger.debug(f"Formatted timestamp for query: {twenty_four_hours_ago_str}")
 
         # Query MongoDB for listings published in the last 24 hours
-        query = {"metadata.publishedOn": {"$gte": twenty_four_hours_ago.isoformat()}}
+        query = {
+            "metadata.publishedOn": {"$gte": "2025-03-09T00:00:00.000Z"}
+        }
+        logger.debug(f"MongoDB query: {query}")
+
+        # Fetch new listings
         new_annonces = await collection.find(query, {'_id': 0}).to_list(length=None)
         count = len(new_annonces)
+        logger.debug(f"Found {count} new listings")
+
+        if count == 0:
+            logger.info("No new listings found within the last 24 hours.")
 
         return {
             "new_annonces": new_annonces,
@@ -68,10 +98,11 @@ async def get_new_annonces():
     except Exception as e:
         logger.error(f"Error fetching new listings: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail="An error occurred while fetching new listings."
         )
 
+        
 @app.get("/statistics")
 async def get_statistics():
     """
