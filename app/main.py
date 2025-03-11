@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from aiocache import cached
 from aiocache.serializers import JsonSerializer
 import logging
-
+from datetime import datetime, timedelta
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,6 +45,110 @@ async def get_annonces(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while fetching listings."
+        )
+
+@app.get("/annonces/new")
+async def get_new_annonces():
+    """
+    Retrieve new real estate listings added in the last 24 hours.
+    """
+    try:
+        # Calculate the timestamp for 24 hours ago
+        twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+
+        # Query MongoDB for listings published in the last 24 hours
+        query = {"metadata.publishedOn": {"$gte": twenty_four_hours_ago.isoformat()}}
+        new_annonces = await collection.find(query, {'_id': 0}).to_list(length=None)
+        count = len(new_annonces)
+
+        return {
+            "new_annonces": new_annonces,
+            "count": count
+        }
+    except Exception as e:
+        logger.error(f"Error fetching new listings: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching new listings."
+        )
+
+@app.get("/statistics")
+async def get_statistics():
+    """
+    Retrieve statistics for building a dashboard.
+    """
+    try:
+        # Total number of listings
+        total_listings = await collection.count_documents({})
+
+        # Number of listings by governorate
+        governorate_stats = await collection.aggregate([
+            {"$group": {"_id": "$location.governorate", "count": {"$sum": 1}}}
+        ]).to_list(length=None)
+
+        # Number of listings by type (sale/rent)
+        type_stats = await collection.aggregate([
+            {"$group": {"_id": "$metadata.producttype", "count": {"$sum": 1}}}
+        ]).to_list(length=None)
+
+        # Average price for sale listings (producttype = 1)
+        avg_price_sale_result = await collection.aggregate([
+            {"$match": {"metadata.producttype": 1, "price": {"$gt": 0, "$lt": 1_000_000, "$exists": True}}},
+            {"$group": {"_id": None, "avg_price": {"$avg": "$price"}}}
+        ]).to_list(length=None)
+        avg_price_sale = avg_price_sale_result[0]["avg_price"] if avg_price_sale_result else 0
+
+        # Average price for rent listings (producttype = 0)
+        avg_price_rent_result = await collection.aggregate([
+            {"$match": {"metadata.producttype": 0, "price": {"$gt": 0, "$lt": 10_000, "$exists": True}}},
+            {"$group": {"_id": None, "avg_price": {"$avg": "$price"}}}
+        ]).to_list(length=None)
+        avg_price_rent = avg_price_rent_result[0]["avg_price"] if avg_price_rent_result else 0
+
+        # Number of listings by publisher type (shop vs. individual)
+        publisher_stats = await collection.aggregate([
+            {"$group": {"_id": "$metadata.publisher.isShop", "count": {"$sum": 1}}}
+        ]).to_list(length=None)
+
+        # Number of listings by delegation, grouped by governorate
+        delegation_by_governorate = await collection.aggregate([
+            {
+                "$group": {
+                    "_id": {
+                        "governorate": "$location.governorate",
+                        "delegation": "$location.delegation"
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.governorate",
+                    "delegations": {
+                        "$push": {
+                            "delegation": "$_id.delegation",
+                            "count": "$count"
+                        }
+                    }
+                }
+            },
+            {"$sort": {"_id": 1}}  # Sort governorates alphabetically
+        ]).to_list(length=None)
+
+        return {
+            "total_listings": total_listings,
+            "governorate_stats": governorate_stats,
+            "type_stats": type_stats,
+            "avg_price_sale": avg_price_sale,
+            "avg_price_rent": avg_price_rent,
+            "publisher_stats": publisher_stats,
+            "delegation_by_governorate": delegation_by_governorate
+        }
+    except Exception as e:
+        logger.error(f"Error fetching statistics: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching statistics."
         )
 
 @app.post("/scrape")
