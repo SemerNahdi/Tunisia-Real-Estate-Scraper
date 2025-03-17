@@ -86,9 +86,12 @@ def fetch_tayara_data_sync():
     logger.info(f"\nAll pages processed. Total listings found: {total_listings_count}")
     logger.info(f"Total listings imported into MongoDB: {len(all_listings)}")
 
+from pymongo import UpdateOne
+
 async def fetch_tayara_data_async():
     """
-    Asynchronous version of the scraping function.
+    Optimized asynchronous scraping function that inserts only new listings.
+    Returns the number of new listings inserted into MongoDB.
     """
     db = get_db()
     collection = db['immo_neuf']
@@ -96,9 +99,12 @@ async def fetch_tayara_data_async():
     async with httpx.AsyncClient() as client:
         page = 1
         all_listings = []
+        existing_ids = set()  # We'll use MongoDB queries to check for duplicates
+
         while True:
             url = f"https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page={page}&category=Immobilier"
             response = await client.get(url)
+
             if response.status_code != 200:
                 logger.error(f"Error: HTTP status code {response.status_code} on page {page}")
                 break
@@ -110,21 +116,52 @@ async def fetch_tayara_data_async():
                     logger.info(f"No listings found on page {page}. Assuming end of pages.")
                     break
 
-                all_listings.extend(listings)
-                logger.info(f"Page {page} processed. Listings: {len(listings)}")
+                # Collect IDs and check if they exist in the database
+                new_listings = []
+                ids_to_check = [listing['id'] for listing in listings]
+
+                # Query MongoDB for existing listings by IDs
+                existing = await collection.find({"id": {"$in": ids_to_check}}).to_list(length=None)
+                existing_ids_set = {entry['id'] for entry in existing}
+
+                # Filter out listings that already exist in the DB
+                for listing in listings:
+                    if listing['id'] not in existing_ids_set:
+                        new_listings.append(listing)
+
+                if new_listings:
+                    all_listings.extend(new_listings)
+                    logger.info(f"Page {page} processed. New listings: {len(new_listings)}, Total new: {len(all_listings)}")
+                else:
+                    logger.info(f"Page {page} processed. No new listings.")
+
                 page += 1
 
             except Exception as e:
                 logger.error(f"Error processing page {page}: {e}")
                 break
 
-        # Save data to MongoDB
+        # Bulk insert new listings into MongoDB if any
         if all_listings:
-            await collection.delete_many({})
-            await collection.insert_many(all_listings)
-            logger.info(f"Total listings imported into MongoDB: {len(all_listings)}")
+            try:
+                # Bulk insert operation to add only new listings
+                operations = [UpdateOne({"id": listing['id']}, {"$set": listing}, upsert=True) for listing in all_listings]
+
+                # Perform the bulk operation
+                if operations:
+                    result = await collection.bulk_write(operations)
+                    inserted_count = result.upserted_count  # Number of new listings inserted
+                    logger.info(f"Bulk operation completed. Inserted {inserted_count} new listings.")
+                    return inserted_count  # Return the number of new listings inserted
+                else:
+                    logger.info("No new listings to insert.")
+                    return 0  # No new listings to insert
+            except Exception as e:
+                logger.error(f"Error performing bulk insert into MongoDB: {e}")
+                return 0  # Return 0 if an error occurs
         else:
-            logger.warning("No listings found to import.")
+            logger.warning("No new listings found to import.")
+            return 0  # Return 0 if no new listings were found
 
 # Choose which version to use (sync or async)
 fetch_tayara_data = fetch_tayara_data_async  # Default to async

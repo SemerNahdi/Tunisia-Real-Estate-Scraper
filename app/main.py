@@ -6,6 +6,8 @@ import logging
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
+from app.scraper import fetch_tayara_data
+
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
 logger = logging.getLogger()
@@ -194,9 +196,9 @@ async def scrape():
     """
     try:
         # Call your scraping function (fetch_tayara_data)
-        from app.scraper import fetch_tayara_data
-        await fetch_tayara_data()
-        return {"status": "Scraping completed successfully"}
+        
+        new_announcements=  await fetch_tayara_data()
+        return {"status": "Scraping completed successfully" , "new_announcements":new_announcements}
     except Exception as e:
         logger.error(f"Error during scraping: {e}")
         raise HTTPException(
