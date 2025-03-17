@@ -189,6 +189,106 @@ async def get_statistics():
             detail="An error occurred while fetching statistics."
         )
 
+@app.get("/annonces/price")
+async def get_annonces_by_price(
+    min_price: int = Query(0, description="Minimum price"),
+    max_price: int = Query(1_000_000, description="Maximum price"),
+    producttype: int = Query(None, description="1 for sale, 0 for rent"),
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Number of items to return")
+):
+    """
+    Retrieve real estate listings by a specified price range.
+    """
+    try:
+        query = {"price": {"$gte": min_price, "$lte": max_price}}
+        if producttype is not None:
+            query["metadata.producttype"] = producttype
+
+        annonces = await collection.find(query, {'_id': 0}).skip(skip).limit(limit).to_list(length=limit)
+        total = await collection.count_documents(query)
+
+        return {
+            "annonces": annonces,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error fetching listings by price range: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching listings."
+        )
+
+@app.get("/annonces/date")
+async def get_annonces_by_date(
+    start_date: datetime = Query(..., description="Start date for the range"),
+    end_date: datetime = Query(..., description="End date for the range"),
+    producttype: int = Query(None, description="1 for sale, 0 for rent"),
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Number of items to return")
+):
+    """
+    Retrieve real estate listings within a specific date range.
+    """
+    try:
+        query = {
+            "metadata.publishedOn": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
+        }
+        if producttype is not None:
+            query["metadata.producttype"] = producttype
+
+        annonces = await collection.find(query, {'_id': 0}).skip(skip).limit(limit).to_list(length=limit)
+        total = await collection.count_documents(query)
+
+        return {
+            "annonces": annonces,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error fetching listings by date range: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching listings."
+        )
+
+@app.get("/annonces/location")
+async def get_annonces_by_location(
+    governorate: str = Query(..., description="Governorate of interest"),
+    delegation: str = Query(None, description="Delegation of interest"),
+    producttype: int = Query(None, description="1 for sale, 0 for rent"),
+    skip: int = Query(0, description="Number of items to skip"),
+    limit: int = Query(10, description="Number of items to return")
+):
+    """
+    Retrieve real estate listings filtered by location (governorate and optionally by delegation) and product type.
+    """
+    try:
+        query = {"location.governorate": governorate}
+        if delegation:
+            query["location.delegation"] = delegation
+        if producttype is not None:
+            query["metadata.producttype"] = producttype
+
+        annonces = await collection.find(query, {'_id': 0}).skip(skip).limit(limit).to_list(length=limit)
+        total = await collection.count_documents(query)
+
+        return {
+            "annonces": annonces,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+    except Exception as e:
+        logger.error(f"Error fetching listings by location: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching listings."
+        )
+
 @app.post("/scrape")
 async def scrape():
     """
