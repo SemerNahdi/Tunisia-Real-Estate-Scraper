@@ -5,9 +5,7 @@ from aiocache.serializers import JsonSerializer
 import logging
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta, timezone
-# Set up logging
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+from fastapi.middleware.cors import CORSMiddleware
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
 logger = logging.getLogger()
@@ -21,9 +19,16 @@ file_handler.setFormatter(formatter)
 # Add the file handler to the logger
 logger.addHandler(file_handler)
 
-# Optionally, set the log level for the root logger
-logger.setLevel(logging.DEBUG)
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow your Next.js frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize MongoDB connection with connection pooling
 client = AsyncIOMotorClient("mongodb://localhost:27017/", maxPoolSize=100)
@@ -76,11 +81,11 @@ async def get_new_annonces():
         # Convert the timestamp to string in ISO format (the same format as 'metadata.publishedOn')
         twenty_four_hours_ago_str = twenty_four_hours_ago.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         logger.debug(f"Formatted timestamp for query: {twenty_four_hours_ago_str}")
-
         # Query MongoDB for listings published in the last 24 hours
         query = {
-            "metadata.publishedOn": {"$gte": "2025-03-09T00:00:00.000Z"}
-        }
+    "metadata.publishedOn": {"$gte": twenty_four_hours_ago_str}
+}
+
         logger.debug(f"MongoDB query: {query}")
 
         # Fetch new listings
