@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from app.scraper import fetch_tayara_data
-
+from app.db import get_db
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
 logger = logging.getLogger()
@@ -26,15 +26,13 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow your Next.js frontend
+    allow_origins=["http://localhost:3000"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize MongoDB connection with connection pooling
-client = AsyncIOMotorClient("mongodb://localhost:27017/", maxPoolSize=100)
-db = client['tayara']
+db = get_db()
 collection = db['immo_neuf']
 
 @app.get("/")
@@ -45,7 +43,7 @@ def read_root():
     return {"message": "Welcome to the Tunisian Real Estate Scraping API!"}
 
 @app.get("/annonces")
-@cached(ttl=60, serializer=JsonSerializer())  # Cache for 60 seconds
+@cached(ttl=60, serializer=JsonSerializer())    
 async def get_annonces(
     skip: int = Query(0, description="Number of items to skip"),
     limit: int = Query(10, description="Number of items to return")
