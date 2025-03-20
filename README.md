@@ -180,7 +180,30 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
     - Listings by type (sale/rent)
     - Average price for sale/rent
     - Listings by publisher type (shop/individual)
-      
+- **Response**:
+```json
+{
+  "annonces": [
+    {
+      "id": "98765",
+      "title": "Luxury Apartment in Tunis",
+      "price": 300000,
+      "location": {
+        "governorate": "Tunis",
+        "delegation": "Carthage"
+      },
+      "metadata": {
+        "publishedOn": "2025-01-01T10:00:00.000Z",
+        "producttype": 1
+      }
+    }
+  ],
+  "total": 20,
+  "skip": 0,
+  "limit": 10
+}
+```
+   
 
 
 ## **Project Structure**
@@ -234,7 +257,7 @@ The API includes **automatic interactive documentation** powered by Swagger UI a
 
 3. **Trigger a New Scraping Session**:
    ```bash
-   curl -X POST http://127.0.0.1:8000/scrape
+   curl -X POST http://127.0.0.1:8000/fetch-tayara-data
    ```
 
 ## **Data Storage**
