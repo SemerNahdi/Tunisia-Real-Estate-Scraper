@@ -210,17 +210,27 @@ async def get_annonces_by_location(
         )
 
 @app.get("/annonces/{listing_id}")
-async def get_listing_by_id(listing_id:str):
-    """Retrieve a specific listing by its unique identifier. """
+async def get_listing_by_id(listing_id: str):
+    """Retrieve a specific listing by its unique identifier."""
     try:
-        listing = await collection.find_one({"id" : listing_id} , {"id": 0})
-        if listing : 
-            return {"listing" : listing}
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="Listing not found")
+        # Query MongoDB for the listing by the 'id' field
+        listing = await collection.find_one({"id": listing_id}, {"_id": 0})
+        
+        if listing:
+            return {"listing": listing}
+        
+        # If the listing is not found, raise a 404 error
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Listing not found"
+        )
     except Exception as e:
         logger.error(f"Error fetching listing by ID: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An error occurred while fetching the listing.")
-            
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching the listing."
+        )
+        
 @app.get("/statistics")
 async def get_statistics():
     """
