@@ -32,8 +32,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db = get_db()
-collection = db['immo_neuf']
+@app.on_event("startup")
+async def startup_db():
+    global db, collection
+    db = await get_db()  # Get the database asynchronously
+    collection = db['immo_neuf']  # Get the collection
 
 @app.get("/")
 def read_root():
@@ -43,7 +46,7 @@ def read_root():
     return {"message": "Welcome to the Tunisian Real Estate Scraping API!"}
 
 @app.get("/annonces")
-@cached(ttl=60, serializer=JsonSerializer())    
+@cached(ttl=60, serializer=JsonSerializer())        
 async def get_annonces(
     skip: int = Query(0, description="Number of items to skip"),
     limit: int = Query(10, description="Number of items to return")
