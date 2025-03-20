@@ -2,42 +2,34 @@ import http.client
 import json
 import time
 import logging
-import httpx
 from pymongo import MongoClient
-from motor.motor_asyncio import AsyncIOMotorClient
-from app.db import get_db
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def fetch_tayara_data_sync():
+def fetch_tayara_data(page: int = 1, max_pages: int = 317):
     """
-    Synchronous version of the scraping function.
+    Synchronously fetch data from Tayara and store it in MongoDB.
+    Returns the number of listings processed and the listings themselves.
     """
     conn = http.client.HTTPSConnection("www.tayara.tn")
     headers = {
         'cookie': "caravel-cookie=%220ca08badccbd001c%22",
         'User-Agent': "insomnia/10.3.1"
     }
-    page = 1
     all_listings = []
     total_listings_count = 0
-    max_pages = 500  # Set a reasonable maximum page limit
 
     try:
         while page <= max_pages:
-            payload = ""
             url = f"/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page={page}&category=Immobilier"
-            conn.request("GET", url, payload, headers)
+            conn.request("GET", url, "", headers)
             res = conn.getresponse()
             status_code = res.status
             data = res.read().decode('utf-8')
 
             if status_code != 200:
                 logger.error(f"Error: HTTP status code {status_code} on page {page}")
-                logger.error(f"Response content: {data}")
-                break  # Stop the loop on HTTP error
+                break
 
             try:
                 json_data = json.loads(data)
@@ -45,8 +37,9 @@ def fetch_tayara_data_sync():
 
                 if not listings:
                     logger.info(f"No listings found on page {page}. Assuming end of pages.")
-                    break  # Stop the loop if no listings are found
+                    break
 
+                # Process listings
                 golden_listing = json_data['pageProps'].get('goldenListing')
                 premium_listing = json_data['pageProps']['searchedListingsAction'].get('premiumHits')
 
@@ -59,35 +52,70 @@ def fetch_tayara_data_sync():
                 total_listings_count += len(listings)
                 logger.info(f"Page {page} processed. Listings: {len(listings)}, Total: {total_listings_count}")
                 page += 1
-                time.sleep(1)  # Pause for 1 second between requests
+                time.sleep(1)  # Be respectful of the website's server by adding a delay between requests
 
             except json.JSONDecodeError:
                 logger.error(f"Error: Invalid JSON on page {page}")
-                logger.error(f"Response content: {data}")
-                break  # Stop the loop if JSON is invalid
+                break
 
     except Exception as e:
         logger.error(f"Error occurred: {e}")
-
     finally:
         conn.close()
 
-    # Save raw data to JSON file
-    with open('tayara_immo_neuf_raw.json', 'w', encoding='utf-8') as f:
-        json.dump(all_listings, f, ensure_ascii=False, indent=4)
+    # Save to MongoDB
+    try:
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client['tayara']
+        collection = db['immo_neuf']
+        collection.delete_many({})  # Clear existing data
+        collection.insert_many(all_listings)  # Insert new data
+        logger.info(f"Data successfully saved to MongoDB.")
+    except Exception as e:
+        logger.error(f"Error saving data to MongoDB: {e}")
 
-    # Save data to MongoDB
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['tayara']
-    collection = db['immo_neuf']
-    collection.delete_many({})  # Clear existing data
-    collection.insert_many(all_listings)  # Insert new data
+    # Save structured CSV (ensure the save_to_csv function is defined elsewhere)
+    try:
+        save_to_csv(all_listings)  # Assuming you have a function to save to CSV
+        logger.info(f"Data successfully saved to CSV.")
+    except Exception as e:
+        logger.error(f"Error saving data to CSV: {e}")
 
-    logger.info(f"\nAll pages processed. Total listings found: {total_listings_count}")
-    logger.info(f"Total listings imported into MongoDB: {len(all_listings)}")
+    return {
+        "message": f"Successfully processed {total_listings_count} listings.",
+        "total_listings_processed": total_listings_count
+    }
 
-from pymongo import UpdateOne
+def save_to_csv(listings):
+    """
+    Converts listing data to a structured CSV format.
+    """
+    csv_data = []
+    for listing in listings:
+        csv_data.append({
+            'id': listing['id'],
+            'title': listing['title'],
+            'description': listing['description'],
+            'price': listing.get('price', ''),
+            'phone': listing.get('phone', ''),
+            'delegation': listing['location']['delegation'],
+            'governorate': listing['location']['governorate'],
+            'publishedOn': listing['metadata']['publishedOn'],
+            'isModified': listing['metadata']['isModified'],
+            'state': listing['metadata']['state'],
+            'subCategory': listing['metadata']['subCategory'],
+            'isFeatured': listing['metadata']['isFeatured'],
+            'publisher_name': listing['metadata']['publisher']['name'],
+            'publisher_isShop': listing['metadata']['publisher']['isShop'],
+            'producttype': listing['metadata']['producttype'],
+            'image_urls': listing['images']
+        })
+    
+    df = pd.DataFrame(csv_data)
+    df.to_csv('tayara_immo_neuf_structured.csv', index=False, encoding='utf-8-sig')
+    logger.info("Data has been saved to tayara_immo_neuf_structured.csv")
 
+### Asynchronous Version
 async def fetch_tayara_data_async():
     """
     Optimized asynchronous scraping function that inserts only new listings.
@@ -99,7 +127,7 @@ async def fetch_tayara_data_async():
     async with httpx.AsyncClient() as client:
         page = 1
         all_listings = []
-        existing_ids = set()  # We'll use MongoDB queries to check for duplicates
+        existing_ids = set()
 
         while True:
             url = f"https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page={page}&category=Immobilier"
@@ -116,15 +144,14 @@ async def fetch_tayara_data_async():
                     logger.info(f"No listings found on page {page}. Assuming end of pages.")
                     break
 
-                # Collect IDs and check if they exist in the database
+                # Process listings
                 new_listings = []
                 ids_to_check = [listing['id'] for listing in listings]
 
-                # Query MongoDB for existing listings by IDs
                 existing = await collection.find({"id": {"$in": ids_to_check}}).to_list(length=None)
                 existing_ids_set = {entry['id'] for entry in existing}
 
-                # Filter out listings that already exist in the DB
+                # Filter out existing listings
                 for listing in listings:
                     if listing['id'] not in existing_ids_set:
                         new_listings.append(listing)
@@ -141,27 +168,17 @@ async def fetch_tayara_data_async():
                 logger.error(f"Error processing page {page}: {e}")
                 break
 
-        # Bulk insert new listings into MongoDB if any
         if all_listings:
             try:
-                # Bulk insert operation to add only new listings
+                # Perform bulk insert operation
                 operations = [UpdateOne({"id": listing['id']}, {"$set": listing}, upsert=True) for listing in all_listings]
-
-                # Perform the bulk operation
-                if operations:
-                    result = await collection.bulk_write(operations)
-                    inserted_count = result.upserted_count  # Number of new listings inserted
-                    logger.info(f"Bulk operation completed. Inserted {inserted_count} new listings.")
-                    return inserted_count  # Return the number of new listings inserted
-                else:
-                    logger.info("No new listings to insert.")
-                    return 0  # No new listings to insert
+                result = await collection.bulk_write(operations)
+                inserted_count = result.upserted_count
+                logger.info(f"Bulk operation completed. Inserted {inserted_count} new listings.")
+                return inserted_count
             except Exception as e:
-                logger.error(f"Error performing bulk insert into MongoDB: {e}")
-                return 0  # Return 0 if an error occurs
+                logger.error(f"Error performing bulk insert: {e}")
+                return 0
         else:
             logger.warning("No new listings found to import.")
-            return 0  # Return 0 if no new listings were found
-
-# Choose which version to use (sync or async)
-fetch_tayara_data = fetch_tayara_data_async  # Default to async
+            return 0

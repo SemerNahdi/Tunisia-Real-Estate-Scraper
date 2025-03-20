@@ -6,7 +6,8 @@ import logging
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
-from app.scraper import fetch_tayara_data
+from pydantic import BaseModel
+from app.scraper import ListingRequest, fetch_tayara_data
 from app.db import get_db
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
@@ -35,8 +36,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db():
     global db, collection
-    db = await get_db()  # Get the database asynchronously
-    collection = db['immo_neuf']  # Get the collection
+    db = await get_db()  
+    collection = db['immo_neuf']  
 
 @app.get("/")
 def read_root():
@@ -310,23 +311,17 @@ async def get_statistics():
             detail="An error occurred while fetching statistics."
         )
 
-@app.post("/scrape")
-async def scrape():
+@app.post("/fetch-tayara-data/")
+async def fetch_data(request: ListingRequest):
     """
-    Trigger a new scraping session.
+    Endpoint to trigger the scraping process.
     """
     try:
-        # Call your scraping function (fetch_tayara_data)
-        
-        new_announcements=  await fetch_tayara_data()
-        return {"status": "Scraping completed successfully" , "new_announcements":new_announcements}
+        result = fetch_tayara_data(page=request.page, max_pages=request.max_pages)
+        return result
     except Exception as e:
-        logger.error(f"Error during scraping: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during scraping."
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+   
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
