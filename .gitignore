@@ -15,7 +15,7 @@ __pycache__/
 .idea/
 
 # Ignore any data files (adjust if needed)
-tayara_immo_neuf_raw.json
+#tayara_immo_neuf_raw.json
 
 # Ignore requirements file in case it gets modified
-requirements.txt
+#requirements.txt

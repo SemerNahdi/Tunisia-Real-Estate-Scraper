@@ -1,7 +1,7 @@
 2025-03-11 10:03:16,598 - DEBUG - {"topologyId": {"$oid": "67cffc5494432b875d91ec42"}, "message": "Starting topology monitoring"}
 2025-03-11 10:03:16,599 - DEBUG - {"topologyId": {"$oid": "67cffc5494432b875d91ec42"}, "previousDescription": "<TopologyDescription id: 67cffc5494432b875d91ec42, topology_type: Unknown, servers: []>", "newDescription": "<TopologyDescription id: 67cffc5494432b875d91ec42, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None>]>", "message": "Topology description changed"}
 2025-03-11 10:03:16,599 - DEBUG - {"topologyId": {"$oid": "67cffc5494432b875d91ec42"}, "serverHost": "localhost", "serverPort": 27017, "message": "Starting server monitoring"}
-2025-03-11 10:03:23,746 - DEBUG - Timestamp for 24 hours ago: 2025-03-10 09:03:23.746030+00:00
+2025-03-11 10:03:23,746 - DEBUG -   : 2025-03-10 09:03:23.746030+00:00
 2025-03-11 10:03:23,746 - DEBUG - Formatted timestamp for query: 2025-03-10T09:03:23.000Z
 2025-03-11 10:03:23,746 - DEBUG - MongoDB query: {'metadata.publishedOn': {'$gte': '2025-03-10T09:03:23.000Z'}}
 2025-03-11 10:03:23,747 - DEBUG - {"clientId": {"$oid": "67cffc5494432b875d91ec42"}, "message": "Connection pool created", "serverHost": "localhost", "serverPort": 27017}
@@ -1591,3 +1591,320 @@
 2025-03-17 15:19:21,698 - INFO - HTTP Request: GET https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page=318&category=Immobilier "HTTP/1.1 500 Internal Server Error"
 2025-03-17 15:19:21,698 - ERROR - Error: HTTP status code 500 on page 318
 2025-03-17 15:19:21,698 - WARNING - No new listings found to import.
+2025-03-20 01:06:08,719 - INFO - No new listings found within the last 24 hours.
+2025-03-20 15:23:28,845 - INFO - No new listings found within the last 24 hours.
+2025-03-20 15:23:30,485 - INFO - No new listings found within the last 24 hours.
+2025-03-20 15:45:54,572 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:45:56,702 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:47:44,744 - INFO - HTTP Request: GET https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page=1&category=Immobilier "HTTP/1.1 200 OK"
+2025-03-20 15:47:44,852 - ERROR - Validation error for listing 67dc289afd1c6385be397a3d: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,852 - ERROR - Validation error for listing 673312e43c20a99fb54de3f8: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,853 - ERROR - Validation error for listing 67d34844efd14d3d0520ebc9: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,853 - ERROR - Validation error for listing 67331bf43c20a99fb54decbd: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,854 - ERROR - Validation error for listing 67d6e0eafd1c6385be365808: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,854 - ERROR - Validation error for listing 6735d17f0d8480a1e00e1512: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,854 - ERROR - Validation error for listing 6733120d0d8480a1e00c320e: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,855 - ERROR - Validation error for listing 67d343f3c68ce6b5539d63ce: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,855 - ERROR - Validation error for listing 67cec4c5c68ce6b5539ab1fe: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,855 - ERROR - Validation error for listing 67d34b6bc68ce6b5539d6a87: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,856 - ERROR - Validation error for listing 67d016cec68ce6b5539b7b86: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,856 - ERROR - Validation error for listing 67dc269ffd1c6385be3978fe: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,857 - ERROR - Validation error for listing 67d40e52ca3467b14e640dfc: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,857 - ERROR - Validation error for listing 67dc265ffd1c6385be3978cb: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,858 - ERROR - Validation error for listing 67dc2641ca3467b14e690179: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,858 - ERROR - Validation error for listing 67dc262afd1c6385be3978a6: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,860 - ERROR - Validation error for listing 67dc2609fd1c6385be39788e: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,860 - ERROR - Validation error for listing 67dc25f5fd1c6385be397881: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,860 - ERROR - Validation error for listing 67dc25beca3467b14e690122: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,861 - ERROR - Validation error for listing 67dc25a2fd1c6385be397851: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,862 - ERROR - Validation error for listing 67dc258afd1c6385be397840: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,862 - ERROR - Validation error for listing 67dc2575fd1c6385be397833: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,863 - ERROR - Validation error for listing 67dc255afd1c6385be397826: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,863 - ERROR - Validation error for listing 67dc24f3fd1c6385be3977e2: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,864 - ERROR - Validation error for listing 67dc2474fd1c6385be397793: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,864 - ERROR - Validation error for listing 67dc22f4ca3467b14e68ff27: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,865 - ERROR - Validation error for listing 67dc22defd1c6385be397682: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,865 - ERROR - Validation error for listing 67dc22b9ca3467b14e68fefa: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,866 - ERROR - Validation error for listing 67dc22a4ca3467b14e68feea: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,867 - ERROR - Validation error for listing 67dc21e2ca3467b14e68fe6a: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:47:44,868 - ERROR - Error processing page 1: 'isModified'
+2025-03-20 15:47:44,869 - WARNING - No new listings found to import.
+2025-03-20 15:48:37,568 - INFO - HTTP Request: GET https://www.tayara.tn/_next/data/TGf_Z4p6UhZCJW0Sjbrbt/en/ads/c/Immobilier.json?page=1&category=Immobilier "HTTP/1.1 200 OK"
+2025-03-20 15:48:37,646 - ERROR - Validation error for listing 67dc289afd1c6385be397a3d: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,647 - ERROR - Validation error for listing 673312e43c20a99fb54de3f8: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,647 - ERROR - Validation error for listing 67d34844efd14d3d0520ebc9: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,648 - ERROR - Validation error for listing 67331bf43c20a99fb54decbd: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,648 - ERROR - Validation error for listing 67d6e0eafd1c6385be365808: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,649 - ERROR - Validation error for listing 6735d17f0d8480a1e00e1512: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,650 - ERROR - Validation error for listing 6733120d0d8480a1e00c320e: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,650 - ERROR - Validation error for listing 67d343f3c68ce6b5539d63ce: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,650 - ERROR - Validation error for listing 67cec4c5c68ce6b5539ab1fe: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,651 - ERROR - Validation error for listing 67d34b6bc68ce6b5539d6a87: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,651 - ERROR - Validation error for listing 67d016cec68ce6b5539b7b86: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,652 - ERROR - Validation error for listing 67dc269ffd1c6385be3978fe: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,652 - ERROR - Validation error for listing 67d40e52ca3467b14e640dfc: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,653 - ERROR - Validation error for listing 67dc265ffd1c6385be3978cb: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,656 - ERROR - Validation error for listing 67dc2641ca3467b14e690179: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,656 - ERROR - Validation error for listing 67dc262afd1c6385be3978a6: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,657 - ERROR - Validation error for listing 67dc2609fd1c6385be39788e: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,657 - ERROR - Validation error for listing 67dc25f5fd1c6385be397881: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,658 - ERROR - Validation error for listing 67dc25beca3467b14e690122: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,658 - ERROR - Validation error for listing 67dc25a2fd1c6385be397851: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,659 - ERROR - Validation error for listing 67dc258afd1c6385be397840: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,660 - ERROR - Validation error for listing 67dc2575fd1c6385be397833: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,662 - ERROR - Validation error for listing 67dc255afd1c6385be397826: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,662 - ERROR - Validation error for listing 67dc24f3fd1c6385be3977e2: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,663 - ERROR - Validation error for listing 67dc2474fd1c6385be397793: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,664 - ERROR - Validation error for listing 67dc22f4ca3467b14e68ff27: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,664 - ERROR - Validation error for listing 67dc22defd1c6385be397682: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,665 - ERROR - Validation error for listing 67dc22b9ca3467b14e68fefa: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,665 - ERROR - Validation error for listing 67dc22a4ca3467b14e68feea: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,667 - ERROR - Validation error for listing 67dc21e2ca3467b14e68fe6a: 1 validation error for Annonce
+state
+  Input should be a valid string [type=string_type, input_value=2, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-20 15:48:37,667 - ERROR - Error processing page 1: 'isModified'
+2025-03-20 15:48:37,668 - WARNING - No new listings found to import.
+2025-03-20 15:54:20,334 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:54:25,936 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:54:27,349 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:54:28,319 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:56:16,092 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:56:20,505 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:56:22,453 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:56:54,557 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:56:55,387 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:08,418 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:10,004 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:10,830 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:11,275 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:11,495 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:11,695 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 15:59:11,898 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:00:06,675 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:00:08,100 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:00:08,710 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:00:22,754 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:00:23,627 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:02:31,871 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:02:32,818 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:07:58,544 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:11:49,719 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:11:51,006 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:12:55,681 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:13:55,514 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:25:24,656 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:35:33,357 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:35:35,047 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:38:27,319 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:38:37,962 - INFO - No new listings found within the last 24 hours.
+2025-03-20 16:47:08,981 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:54:20,800 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 16:59:02,145 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:43,554 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:46,457 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:47,208 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:47,512 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:47,738 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:47,919 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:48,105 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:48,284 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:03:48,450 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:07:47,217 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:12:02,393 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:20:41,807 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:21:10,686 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:25:56,527 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:25:57,471 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:26:02,185 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:27:55,423 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:27:56,158 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:28:10,747 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:29:07,906 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:30:32,690 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:30:33,456 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:31:34,228 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:34:29,353 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:36:34,605 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:36:56,840 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:39:17,184 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:39:42,088 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:43:06,819 - ERROR - Error during scraping: 'coroutine' object is not subscriptable
+2025-03-20 17:47:24,974 - ERROR - Error during scraping: 'coroutine' object is not subscriptable

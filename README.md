@@ -8,11 +8,13 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 
 - Extracts real estate listings from Tayara.tn.
 - Handles pagination and saves data to MongoDB.
+- Stores data in MongoDB.
 
 ### **2. RESTful API**
 
 - Exposes the scraped data via endpoints.
 - Allows triggering new scraping sessions.
+- Allows searching, filtering, and sorting real estate listings.
 - Supports pagination for retrieving listings in smaller chunks.
 
 ### **3. Data Storage**
@@ -24,8 +26,15 @@ This project is a **FastAPI-based web scraping solution** for extracting real es
 
 - Generates interactive API documentation using Swagger UI and ReDoc.
 
-###**5. Caching**
-Uses aiocache to cache API responses for improved performance.
+### **5. Caching**
+
+- Uses aiocache to cache API responses for improved performance.
+
+### **6. Error Handling & Logging**
+
+- Includes robust error handling for failed requests.
+- Logs errors for debugging.
+
 
 ## **Technologies Used**
 
@@ -58,7 +67,7 @@ Uses aiocache to cache API responses for improved performance.
 
    ```bash
    python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   venv\Scripts\activate
    ```
 
 3. Install dependencies:
@@ -96,10 +105,10 @@ Uses aiocache to cache API responses for improved performance.
 - **URL**: `http://127.0.0.1:8000/annonces`
 - **Method**: `GET`
 - **Description**: Retrieve all real estate listings from the database.
--**Parameters**:
-      skip (optional): Number of items to skip (default: 0).
-      limit (optional): Number of items to return (default: 10).
--**Response**:
+- **Parameters**:
+    - skip (optional): Number of items to skip (default: 0).
+    - limit (optional): Number of items to return (default: 10).
+- **Response**:
 
 ```json
 {
@@ -134,13 +143,45 @@ Uses aiocache to cache API responses for improved performance.
 - **URL**: `http://127.0.0.1:8000/scrape`
 - **Method**: `POST`
 - **Description**: Trigger a new scraping session to update the database.
-  **Response**:
+- **Response**:
 
 ```json
 {
   "status": "Scraping completed successfully"
 }
 ```
+
+### **4. Retrieve Listings by Date Range**
+- **URL**: `http://127.0.0.1:8000/annonces/date`
+- **Method**: `GET`
+- **Description**: Retrieve announcement based on a time limit.
+- **Parameters**:
+  - start_date (required).
+  - end_date (required)
+  - producttype (optional, 1 for sale, 0 for rent)
+
+### **5.  Retrieve Listings by Location**
+- **URL**: `http://127.0.0.1:8000/annonces/location`
+- **Method**: `GET`
+- **Description**: Retrieve announcement based on a time limit.
+- **Parameters**:
+    - governorate (required)
+    - delegation  (optional)
+    - producttype (optional, 1 for sale, 0 for rent)
+
+
+### **6. Retrieve Statistics**
+- **URL**: `http://127.0.0.1:8000//statistics`
+- **Method**: `GET`
+- **Description**: Retrieve statistics for dashboards.
+- **Includes**:
+    - Total listings
+    - Listings by governorate
+    - Listings by type (sale/rent)
+    - Average price for sale/rent
+    - Listings by publisher type (shop/individual)
+      
+
 
 ## **Project Structure**
 
@@ -201,11 +242,12 @@ The API includes **automatic interactive documentation** powered by Swagger UI a
 - **MongoDB**:
   - Database: `tayara`
   - Collection: `immo_neuf`
+
 - **Files**:
   - Raw data: `tayara_immo_neuf_raw.json`
   - Structured data: `tayara_immo_neuf_structured.csv`
-## **Caching**
 
+## **Caching**
    - The /annonces endpoint caches responses for 60 seconds using aiocache.
    - Caching reduces database load and improves API performance.
 
