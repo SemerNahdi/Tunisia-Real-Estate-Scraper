@@ -1,21 +1,48 @@
-# Ignore Python bytecode files
+# Python bytecode files
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
-__pycache__/
+*.pdb
 
-# Ignore virtual environment directory
+# Virtual environment directories
 .venv/
+env/
+venv/
 
-# Ignore log files
-*.log
-
-# Ignore IDE/editor specific files (e.g., VSCode, PyCharm, etc.)
+# IDE/editor directories and files (VS Code, PyCharm, etc.)
 .vscode/
 .idea/
 
-# Ignore any data files (adjust if needed)
-#tayara_immo_neuf_raw.json
+# System files
+Thumbs.db
+.DS_Store
 
-# Ignore requirements file in case it gets modified
-#requirements.txt
+# Log files
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+*.tar.gz
+
+# Environment variable files
+.env
+.envrc
+
+# Database files
+*.sqlite3
+*.db
+
+# Python dependencies files (in case of auto-generation or caching)
+*.nox/
+*.coverage
+.coverage.*
+nosetests.xml
+test_*.xml
+tox.ini

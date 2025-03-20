@@ -2,8 +2,13 @@ import http.client
 import json
 import time
 import logging
-from pymongo import MongoClient
+from turtle import pd
+import httpx
+from pymongo import MongoClient, UpdateOne
 
+from app.db import get_db
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def fetch_tayara_data(page: int = 1, max_pages: int = 317):
@@ -76,7 +81,7 @@ def fetch_tayara_data(page: int = 1, max_pages: int = 317):
 
     # Save structured CSV (ensure the save_to_csv function is defined elsewhere)
     try:
-        save_to_csv(all_listings)  # Assuming you have a function to save to CSV
+        save_to_csv(all_listings)  
         logger.info(f"Data successfully saved to CSV.")
     except Exception as e:
         logger.error(f"Error saving data to CSV: {e}")
@@ -121,7 +126,7 @@ async def fetch_tayara_data_async():
     Optimized asynchronous scraping function that inserts only new listings.
     Returns the number of new listings inserted into MongoDB.
     """
-    db = get_db()
+    db = await get_db()
     collection = db['immo_neuf']
 
     async with httpx.AsyncClient() as client:

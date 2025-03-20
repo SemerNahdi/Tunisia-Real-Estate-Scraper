@@ -1,6 +1,9 @@
  
 from pydantic import BaseModel
 
+class ListingRequest(BaseModel):
+    page: int = 1
+    max_pages: int = 317
 class Annonce(BaseModel):
     id: str
     title: str

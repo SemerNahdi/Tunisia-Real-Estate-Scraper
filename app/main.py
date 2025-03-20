@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from datetime import datetime, timedelta, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from app.scraper import ListingRequest, fetch_tayara_data
+from app.models import ListingRequest
+from app.scraper import  fetch_tayara_data
 from app.db import get_db
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
