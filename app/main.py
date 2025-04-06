@@ -312,6 +312,36 @@ async def get_statistics():
             detail="An error occurred while fetching statistics."
         )
 
+@app.get("/governorates-with-delegations")
+async def get_governorates_with_delegations():
+    """
+    Retrieve a list of governorates along with their respective delegations.
+    """
+    try:
+        # Aggregate data by governorate and delegation
+        governorates_delegations = await collection.aggregate([
+            {
+                "$group": {
+                    "_id": "$location.governorate",
+                    "delegations": {"$addToSet": "$location.delegation"}
+                }
+            },
+            {"$sort": {"_id": 1}}  # Sort by governorate name
+        ]).to_list(length=None)
+
+        # Format the result to a more friendly structure
+        result = [{"governorate": item["_id"], "delegations": item["delegations"]} for item in governorates_delegations]
+
+        return {"governorates_with_delegations": result}
+
+    except Exception as e:
+        logger.error(f"Error fetching governorates with delegations: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching governorates and delegations."
+        )
+
+
 @app.post("/fetch-tayara-data/")
 async def fetch_data(request: ListingRequest):
     """

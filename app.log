@@ -1,0 +1,8 @@
+2025-04-06 15:58:10,890 - INFO - No new listings found within the last 24 hours.
+2025-04-06 15:58:13,552 - INFO - No new listings found within the last 24 hours.
+2025-04-06 15:58:35,942 - ERROR - Error: HTTP status code 404 on page 1
+2025-04-06 15:58:36,308 - ERROR - Error saving data to MongoDB: documents must be a non-empty list
+2025-04-06 15:58:36,308 - ERROR - Error saving data to CSV: 'function' object has no attribute 'DataFrame'
+2025-04-06 15:58:42,422 - ERROR - Error: HTTP status code 404 on page 1
+2025-04-06 15:58:42,456 - ERROR - Error saving data to MongoDB: documents must be a non-empty list
+2025-04-06 15:58:42,456 - ERROR - Error saving data to CSV: 'function' object has no attribute 'DataFrame'
