@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from app.models import ListingRequest
 from app.scraper import  fetch_tayara_data
 from app.db import get_db
+from typing import Optional
 # Set up logging to log to a file
 log_file = 'app.log'  # Specify the log file location
 logger = logging.getLogger()
@@ -341,7 +342,6 @@ async def get_governorates_with_delegations():
             detail="An error occurred while fetching governorates and delegations."
         )
 
-
 @app.post("/fetch-tayara-data/")
 async def fetch_data(request: ListingRequest):
     """
@@ -352,7 +352,143 @@ async def fetch_data(request: ListingRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
-   
+  
+@app.get("/governorate-stats")
+async def get_governorate_stats(
+    governorate: str = Query(..., description="Governorate of interest"),
+    start_date: datetime = Query(..., description="Start date for the time period"),
+    end_date: datetime = Query(..., description="End date for the time period")
+):
+    """
+    Retrieve statistics for a specific governorate within a given time period.
+    Includes total listings (split by rent/sale), average prices, monthly average prices,
+    custom time range average prices, listings by delegation, and publisher type distribution.
+    """
+    try:
+        # Base query for the governorate and date range
+        base_query = {
+            "location.governorate": governorate,
+            "metadata.publishedOn": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
+        }
+
+        # 1. Total number of listings (split by rent and sale)
+        total_listings_rent = await collection.count_documents({**base_query, "metadata.producttype": 0})
+        total_listings_sale = await collection.count_documents({**base_query, "metadata.producttype": 1})
+
+        # 2. Average rental and sale prices
+        avg_price_rent_result = await collection.aggregate([
+            {"$match": {**base_query, "metadata.producttype": 0, "price": {"$gt": 0, "$lt": 10_000, "$exists": True}}},
+            {"$group": {"_id": None, "avg_price": {"$avg": "$price"}}}
+        ]).to_list(length=None)
+        avg_price_rent = avg_price_rent_result[0]["avg_price"] if avg_price_rent_result else 0
+
+        avg_price_sale_result = await collection.aggregate([
+            {"$match": {**base_query, "metadata.producttype": 1, "price": {"$gt": 0, "$lt": 1_000_000, "$exists": True}}},
+            {"$group": {"_id": None, "avg_price": {"$avg": "$price"}}}
+        ]).to_list(length=None)
+        avg_price_sale = avg_price_sale_result[0]["avg_price"] if avg_price_sale_result else 0
+
+        # 3. Monthly average prices for the period (for line graph)
+        monthly_avg_prices = await collection.aggregate([
+            {"$match": {**base_query, "price": {"$gt": 0, "$exists": True}}},
+            {
+                "$group": {
+                    "_id": {
+                        "year": {"$year": {"$dateFromString": {"dateString": "$metadata.publishedOn"}}},
+                        "month": {"$month": {"$dateFromString": {"dateString": "$metadata.publishedOn"}}},
+                        "producttype": "$metadata.producttype"
+                    },
+                    "avg_price": {"$avg": "$price"},
+                    "count": {"$sum": 1}
+                }
+            },
+            {"$sort": {"_id.year": 1, "_id.month": 1}}
+        ]).to_list(length=None)
+
+        monthly_avg_prices_formatted = [
+            {
+                "year": item["_id"]["year"],
+                "month": item["_id"]["month"],
+                "producttype": "rent" if item["_id"]["producttype"] == 0 else "sale",
+                "avg_price": item["avg_price"],
+                "count": item["count"]
+            } for item in monthly_avg_prices
+        ]
+
+        # 4. Average prices for a custom time range (by months) for rent or sale
+        custom_range_avg_prices = await collection.aggregate([
+            {"$match": {**base_query, "price": {"$gt": 0, "$exists": True}}},
+            {
+                "$group": {
+                    "_id": {
+                        "year": {"$year": {"$dateFromString": {"dateString": "$metadata.publishedOn"}}},
+                        "month": {"$month": {"$dateFromString": {"dateString": "$metadata.publishedOn"}}},
+                        "producttype": "$metadata.producttype"
+                    },
+                    "avg_price": {"$avg": "$price"}
+                }
+            },
+            {"$sort": {"_id.year": 1, "_id.month": 1}}
+        ]).to_list(length=None)
+
+        custom_range_avg_prices_formatted = [
+            {
+                "year": item["_id"]["year"],
+                "month": item["_id"]["month"],
+                "producttype": "rent" if item["_id"]["producttype"] == 0 else "sale",
+                "avg_price": item["avg_price"]
+            } for item in custom_range_avg_prices
+        ]
+
+        # 5. Number of listings by delegation within the governorate
+        delegation_stats = await collection.aggregate([
+            {"$match": base_query},
+            {"$group": {"_id": "$location.delegation", "count": {"$sum": 1}}},
+            {"$sort": {"_id": 1}}
+        ]).to_list(length=None)
+
+        # 6. Distribution of listings by publisher type (shop vs. individual)
+        publisher_stats = await collection.aggregate([
+            {"$match": base_query},
+            {"$group": {"_id": "$metadata.publisher.isShop", "count": {"$sum": 1}}}
+        ]).to_list(length=None)
+
+        publisher_stats_formatted = [
+            {"publisher_type": "shop" if item["_id"] else "individual", "count": item["count"]}
+            for item in publisher_stats
+        ]
+
+        # Return the combined statistics
+        return {
+            "governorate": governorate,
+            "time_period": {
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat()
+            },
+            "total_listings": {
+                "rent": total_listings_rent,
+                "sale": total_listings_sale,
+                "total": total_listings_rent + total_listings_sale
+            },
+            "average_prices": {
+                "rent": avg_price_rent,
+                "sale": avg_price_sale
+            },
+            "monthly_average_prices": monthly_avg_prices_formatted,
+            "custom_range_average_prices": custom_range_avg_prices_formatted,
+            "delegation_stats": delegation_stats,
+            "publisher_stats": publisher_stats_formatted
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching governorate statistics: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching governorate statistics."
+        )
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
